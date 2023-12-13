@@ -51,25 +51,45 @@
 
 <pre>
 <% 
-		String fromAirport = request.getParameter("selectedDepartAirport");
+		/* String fromAirport = request.getParameter("selectedDepartAirport");
 		String toAirport = request.getParameter("selectedArrivalAirport");
 		String depDate = request.getParameter("departDate");
 		String retDate = request.getParameter("returnDate");
 		String cabinClass = request.getParameter("cabinClass");
-		String flightType = request.getParameter("flightType");
+		String flightType = request.getParameter("flightType"); */
 		String sortCriteria = request.getParameter("sortCriteria");
-
-		out.println("<p>Departure: " + fromAirport);
-		out.println("Arrival: " + toAirport);
-		out.println("Departure date:" + depDate);
-		out.println("Arrival date: " + retDate);
-		out.println("Cabin class: "  + cabinClass);
-		out.println("FlightType: " + flightType + "</p>");
-		out.println();
-		GenerateFlights fls = new GenerateFlights();
-		List<Flight> flights = fls.getFlights(fromAirport, toAirport, flightType, cabinClass, depDate, retDate);
+		String formType = request.getParameter("formType");
 		
-		session.setAttribute("flightList", flights);
+		List<Flight> flights = null;
+		
+		if ("Search Flights".equals(formType)) {
+			String fromAirport = request.getParameter("selectedDepartAirport");
+			String toAirport = request.getParameter("selectedArrivalAirport");
+			String depDate = request.getParameter("departDate");
+			String retDate = request.getParameter("returnDate");
+			String cabinClass = request.getParameter("cabinClass");
+			String flightType = request.getParameter("flightType");
+			
+			out.println("<p>Departure: " + fromAirport);
+			out.println("Arrival: " + toAirport);
+			out.println("Departure date:" + depDate);
+			out.println("Arrival date: " + retDate);
+			out.println("Cabin class: "  + cabinClass);
+			out.println("FlightType: " + flightType + "</p>");
+			out.println();
+			flights = new GenerateFlights().getFlights(fromAirport, toAirport, flightType, cabinClass, depDate, retDate);
+			session.setAttribute("flightList", flights);
+			
+		}else if("Filter Flights".equals(formType)){
+			String maxPrice = request.getParameter("maxPrice");
+	        String maxStops = request.getParameter("maxStops");
+	        String airline = request.getParameter("airline");
+	        String takeOffTime = request.getParameter("takeOffTime");
+	        String landingTime = request.getParameter("landingTime");
+	        out.println();
+	        flights = new GenerateFlights().filterFlights(maxPrice, maxStops, airline, takeOffTime, landingTime);
+	        session.setAttribute("flightList", flights);
+		}
 		//List<Flight> sortedFlights = (List<Flight>) session.getAttribute("sortedFlightList");
 		/* session.setAttribute("sortedFlightList", flights);
 		List<Flight> sortedFlights = (List<Flight>) session.getAttribute("sortedFlightList");
@@ -79,7 +99,7 @@
 		//out.println(fls.displayFlights(fromAirport, toAirport, flightType, cabinClass, depDate, retDate));		
 		%>
 </pre>
-<%if(!flights.isEmpty()){ %>
+<%if(flights != null && !flights.isEmpty()){ %>
 	<form id="sortForm" action="sort.jsp" method="get">
         <label for="sortCriteria">Sort by:</label>
         <select id="sortCriteria" name="sortCriteria" onchange="applySortFilter()">
@@ -105,14 +125,23 @@
 	                Airline ID: <%= flight.getAirlineId() %><br>
 	                Aircraft ID: <%= flight.getAircraftId() %><br>
 	                Flight Type: <%= flight.getFlightType() %><br>
-	                Cabin Type: <%=  cabinClass %><br>
+	                <% if(flight.getCabinClass() != null){%>
+	                Cabin Type: <%=  flight.getCabinClass() %><br>
+	                <%}%>
 	                Depart Date: <%= flight.getFromDate() %><br>
 	                Route: <%= flight.getFromAirport() %> to <%= flight.getToAirport() %><br>
 	                Departure Time: <%= flight.getFromTime() %><br>
 	                Arrival Time: <%= flight.getToTime() %><br>
 	                Duration: <%= flight.duration() %><br>
 	                Number of Stops: <%= flight.getNumStops() %><br>
-	                Price: $<%= flight.getPrice() %></p>
+	               	<% if(flight.getCabinClass() != null){%>
+	                Price: $<%= flight.getPrice() %>
+	                <%}else{%>
+	                 Economy Price: $<%= flight.getEcoPrice()%><br>
+	                 Business Price: $<%= flight.getBusPrice()%><br>
+	                 First Class Price: $<%= flight.getFirPrice()%>
+	                <%}%>
+	                </p>
 	            </div>
 	            <!-- "Book Now" button with onclick event -->
 	            <button class="btn" onclick="handleBookNow('<%= flight.getFlightNum() %>')">Book Now</button>
@@ -155,31 +184,3 @@
 
 </body>
 </html>
-<!-- /* 
-/*  $.ajax({
-	        url: "sort.jsp", // Target the JSP that returns sorted list content
-	        type: "get",
-	        data: $('#sortForm').serialize(),
-	        success: function(data) {
-	            // Update the flightList div with the received sorted list content
-	            $('#flightList').html(data);
-	        }
-	    }); */$(document).ready(function () {
-	    // On change of sorting criteria, submit the form using AJAX
-	    $('#sortCriteria').change(function () {
-	        applySortFilter();
-	    });
-	
-	    // Function to apply sorting filter and update the flight list
-	    function applySortFilter() {
-	        $.ajax({
-	            url: "sort.jsp",
-	            type: "get",
-	            data: $('#sortForm').serialize(),
-	            success: function (data) {
-	                // Update the flightList div with the received sorted list content
-	                $('#flightList').html(data);
-	            }
-	        });
-	    }
-	}); */ -->
