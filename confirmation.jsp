@@ -100,18 +100,21 @@ else {%>
 				boolean exists = false;
 				try (java.sql.Connection connection = new ApplicationDB().getConnection()) {
 					String sql = "SELECT COUNT(*) FROM waitlist WHERE username = ? and flight_num = ? and f_name = ? and l_name = ?";
-			        try (PreparedStatement preparedStatement = connection.prepareStatement(sql)) {
-			            preparedStatement.setString(1, username);
-			            preparedStatement.setString(2, flightNum);
-			            preparedStatement.setString(3, fname);
-			            preparedStatement.setString(4, lname);
-			            try (ResultSet resultSet = preparedStatement.executeQuery()) {
-			                if (resultSet.next()) {
-			                    //int count = resultSet.getInt(1);
-			                    exists = true;
-			                }
-			            }
-			        }
+					try (PreparedStatement preparedStatement = connection.prepareStatement(sql)) {
+					    preparedStatement.setString(1, username);
+					    preparedStatement.setString(2, flightNum);
+					    preparedStatement.setString(3, fname);
+					    preparedStatement.setString(4, lname);
+					    try (ResultSet resultSet = preparedStatement.executeQuery()) {
+					        if (resultSet.next()) {
+					            int count = resultSet.getInt(1); // Get the count value
+					            System.out.println("Count: " + count);
+					            if (count > 0) {
+					                exists = true; // The row exists if count > 0
+					            }
+					        }
+					    }
+					}
 			        if(exists == false){
 						String sql1 = "INSERT INTO waitlist (username, flight_num, f_name, l_name) VALUES (?, ?, ?, ?)";
 						try (PreparedStatement preparedStatement = connection.prepareStatement(sql1)) {
