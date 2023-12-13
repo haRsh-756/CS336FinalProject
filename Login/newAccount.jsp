@@ -37,7 +37,7 @@
             	//	out.println();
             	//}
             	session.setAttribute("user", username); // the username will be stored in the session
-                response.sendRedirect("Customer/custSuccess.jsp");
+                response.sendRedirect("../Customer/custSuccess.jsp");
             }
 		}
 	%>
