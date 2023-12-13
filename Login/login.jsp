@@ -20,12 +20,14 @@
     %>
     <%String account = (String) session.getAttribute("selectedAccount"); %>
     <p> You have selected: <%=account%> account</p>
-  <form action="loginDetails.jsp" method="POST">
-  		Username: <input type="text" name="username" required/> <br/>
-  		Password:<input type="password" name="password" required/> <br/>
-  	<input type="submit" value="Submit"/>
+	<form action="loginDetails.jsp" method="POST">
+		Username: <input type="text" name="username"/> <br/>
+		Password:<input type="password" name="password"/> <br/>
+	<input type="submit" value="Submit"/>
 	</form>
-	<p><a href ="newAccount.jsp">Create Account</a></p>
+	<% if ("customer".equals(account)) { %>
+	    <p><a href ="newAccount.jsp">Create Account</a></p>
+	<% } %>
 	<p><a href = "landing.jsp">Home</a></p>
 </body>
 </html>
