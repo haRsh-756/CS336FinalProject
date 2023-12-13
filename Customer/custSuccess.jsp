@@ -24,8 +24,8 @@
 		<!-- <a href='logout.jsp' class="button">Log out</a> -->
 		<a href='custLogout.jsp'><button>Logout</button></a>
 		<a href='flightSearch.jsp'><button>Flight Search</button></a>
-		<a href='flightSearch.jsp'><button>Reservations</button></a>
-		<a href='flightSearch.jsp'><button>Support</button></a>
+		<a href='TicketHistory/reservationDisplay.jsp'><button>Reservations</button></a>
+		<a href='Support/qnaSearch.jsp'><button>Support</button></a>
 	<%
 	}
 	%>
