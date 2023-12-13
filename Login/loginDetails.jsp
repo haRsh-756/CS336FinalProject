@@ -28,7 +28,7 @@
 			//Close the connection. 
 			con.close();
 			//out.println("<a href='logout.jsp'>Log out</a>");
-			response.sendRedirect("Customer/custSuccess.jsp");
+			response.sendRedirect("../Customer/custSuccess.jsp");
 		} 
 		else if (account.equals("custrep")) {
 			session.setAttribute("user", userid); // the username will be stored in the session
@@ -36,7 +36,7 @@
 			//Close the connection. 
 			con.close();
 			//out.println("<a href='logout.jsp'>Log out</a>");
-			response.sendRedirect("CustRep/custRepSuccess.jsp");
+			response.sendRedirect("../CustRep/custRepSuccess.jsp");
 		} 
 		else if (account.equals("admin")) {
 			session.setAttribute("user", userid); // the username will be stored in the session
@@ -44,7 +44,7 @@
 			//Close the connection. 
 			con.close();
 			//out.println("<a href='logout.jsp'>Log out</a>");
-			response.sendRedirect("Admin/adminSuccess.jsp");
+			response.sendRedirect("../Admin/adminSuccess.jsp");
 		}
 	}
 	else {
