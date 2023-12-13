@@ -3,6 +3,7 @@
    <%@ page import="java.sql.*, java.util.*, javax.sql.*" %>
 <%@ page import="javax.naming.InitialContext, javax.naming.Context" %>
 <!DOCTYPE html>
+
 <%
     String idNum = request.getParameter("id");
     String confirm = request.getParameter("confirm");
@@ -13,7 +14,7 @@
     ApplicationDB db = new ApplicationDB();
     Connection conn = db.getConnection();
 
-    if ("true".equals(confirm)) {
+    if ("YES".equals(confirm)) {
         String deleteQuery = "DELETE FROM ticket WHERE id_num = ?";
         try (PreparedStatement pstmt = conn.prepareStatement(deleteQuery)) {
             pstmt.setInt(1, Integer.parseInt(idNum));
