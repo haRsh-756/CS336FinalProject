@@ -18,7 +18,7 @@
 		Welcome <%=session.getAttribute("user")%> <% //this will display the username that is stored in the session.%>
 		<!-- <a href='logout.jsp' class="button">Log out</a> -->
 		<a href='custRepLogout.jsp'><button>Logout</button></a>
-		<a href='NULL'><button>Reservation Editing</button></a>
+		<a href='modifyReservation.jsp'><button>Reservation Editing</button></a>
 		<a href='supportQuestions/questionList.jsp'><button>Customer Support</button></a>
 		<a href='Lists/ListSelect.jsp'><button>Flight Airport and Wait Lists</button></a>
         <a href='addEditDel/selectItem.jsp'><button>Edit Aircrafts, Airports and Flight Information</button></a>
