@@ -7,7 +7,17 @@
 <title>Insert title here</title>
 </head>
 <body>
-	<pre>
+<%
+if ((session.getAttribute("user") == null)) {
+%>
+	You are not logged in<br/>
+	<a href="../Login/landing.jsp">Please Login</a>
+<%}
+else {%>
+		Welcome <%= session.getAttribute("user")%>
+		<a href='custLogout.jsp'><button>Logout</button></a>
+		<a href='flightSearch.jsp'><button>Back</button></a>
+<pre>
 	<%
     // Retrieve flight details from the session
     List<Flight> flights = (List<Flight>) session.getAttribute("flightList");
@@ -55,3 +65,4 @@
 	</form>
 </body>
 </html>
+<%}%>
