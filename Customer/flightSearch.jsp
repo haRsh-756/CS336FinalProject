@@ -199,7 +199,7 @@
 		function toggleDateInput() {
 	        var flightType = $("#flightType").val();
 	        //var arrival = $("#arrive").val();
-	        if (flightType === "oneWay" || flightType === "flexibleOneWay") {
+	        if (flightType === "One Way" || flightType === "flexibleOneWay") {
 	            $("#returnDate").prop("disabled", true);
 	            $("#returnDate").val(null);
 	            //$("#arrive").val("").prop("disabled", true);
