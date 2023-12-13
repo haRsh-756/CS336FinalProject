@@ -14,6 +14,14 @@
 </script>
 </head>
 <body>
+
+<%@ page import ="java.sql.*" %>
+    <form action="custLogout.jsp" method="post">
+        <input type="submit" value="Logout">
+    </form>
+    <form action="custSuccess.jsp" method="post">
+        <input type="submit" value="Back">
+    </form>
     <% 
     String user = (String) session.getAttribute("user");
     int flightNum = Integer.parseInt(request.getParameter("flightNum"));
