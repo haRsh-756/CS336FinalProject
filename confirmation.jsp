@@ -1,139 +1,177 @@
-package com.air;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Time;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
-import java.time.LocalDate;
-import java.time.LocalTime;
-import java.time.ZoneId;
-import java.time.format.DateTimeFormatter;
-import java.util.*;
-import java.sql.Date;
+<%@ page language="java" contentType="text/html; charset=UTF-8"
+    pageEncoding="UTF-8" import = "com.air.*" import="java.util.*" import="java.time.*" 
+    import="java.time.format.DateTimeFormatter" import="java.sql.*" import="java.sql.Date"%>
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Confirmation Page</title>
+</head>
+<body>
 
-//import jakarta.servlet.http.HttpServlet;
-
-public class GenerateFlights{
-
-	public List<Flight> getFlightsFromDB(){
-		
-		String selectQuery = "SELECT * FROM flights";
-		List<Flight> fls = new ArrayList<>();
-		try (java.sql.Connection connection = new ApplicationDB().getConnection()){
-			try(PreparedStatement preparedStatement = connection.prepareStatement(selectQuery)){
-				try(ResultSet resultSet = preparedStatement.executeQuery()){
-					while (resultSet.next()) {
-						
-						 String airlineId = resultSet.getString("airline_id");
-					     String aircraftId = resultSet.getString("aircraft_id");
-					     String fromAirport = resultSet.getString("from_airport");
-					     String fromDate = resultSet.getString("from_date");
-					     String fromTime = resultSet.getString("from_time");
-					     String toAirport = resultSet.getString("to_airport");
-					     String toDate = resultSet.getString("to_date");
-					     String toTime = resultSet.getString("to_time");
-					     int isDomestic = resultSet.getInt("is_domestic");
-					     int flightNum = resultSet.getInt("flight_num");
-					     String flightType = resultSet.getString("flight_type");
-					     int numStops = resultSet.getInt("num_stops");
-					     float ecoPrice = resultSet.getFloat("eco_price");
-					     float busPrice = resultSet.getFloat("bus_price");
-					     float firPrice = resultSet.getFloat("fir_price");
-					     int maxSeats = 0;
-			                String maxSeatsQuery = "SELECT num_seats FROM aircraft WHERE aircraft_id = ?";
-			                try (PreparedStatement preparedStatement1 = connection.prepareStatement(maxSeatsQuery)) {
-			                    preparedStatement1.setString(1, aircraftId);
-			                    try (ResultSet rs = preparedStatement1.executeQuery()) {
-			                        if (rs.next()) {
-			                            maxSeats = rs.getInt("num_seats");
-			                        }
-			                    }
-			                }
-
-			                // Check if the flight is full
-			                String ticketCountQuery = "SELECT COUNT(*) as ticket_count FROM ticket WHERE flight_num = ?";
-			                boolean isFull = false;
-			                try (PreparedStatement preparedStatement2 = connection.prepareStatement(ticketCountQuery)) {
-			                    preparedStatement2.setInt(1, flightNum);
-			                    try (ResultSet rs = preparedStatement2.executeQuery()) {
-			                        if (rs.next() && rs.getInt("ticket_count") >= maxSeats) {
-			                            isFull = true;
-			                        }
-			                    }
-			                }
-
-			                Flight ft = new Flight(airlineId, aircraftId, fromAirport, fromDate, fromTime, toAirport, toDate, toTime, 
-			                        isDomestic, flightNum, flightType, numStops, ecoPrice, busPrice, firPrice, isFull);
-			                ft.setAc(new Aircraft(aircraftId, maxSeats));
-			                fls.add(ft);
-					   //create flight with flex dates through out the session and storing into dataManager class instance
-					}
-				}
-			} //create flight with flex dates through out the session and storing into dataManager class instanc
-		} catch (SQLException e) {
-				e.printStackTrace();
-		} 
-		//fls = generateFlightsWithFlex(fls);
-		//pushCopiesToDB(fls);
-		//create flight with flex dates through out the session basically copies of flight with manually changing dates, time, numstops
-		DataManager.getInstance().setFlights(fls);
-        return fls;
+<%
+if ((session.getAttribute("user") == null)) {
+%>
+	You are not logged in<br/>
+	<a href="../Login/landing.jsp">Please Login</a>
+<%}
+else {%>
+		Welcome <%= session.getAttribute("user")%>
+		<a href='custLogout.jsp'><button>Logout</button></a>
+		<a href='flightSearch.jsp'><button>Back</button></a>
+<%  
+ String fname = request.getParameter("firstName");
+ String lname = request.getParameter("lastName");
+ String flightNum = (String)session.getAttribute("flightNum");
+ String username = (String)session.getAttribute("user");
+ 
+ ZoneId estZone = ZoneId.of("America/New_York");
+ ZonedDateTime currentDateTimeInEST = ZonedDateTime.now(estZone);
+ LocalDate currentDateInEST = currentDateTimeInEST.toLocalDate();
+ LocalTime currentTimeInEST = currentDateTimeInEST.toLocalTime();
+ DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+ DateTimeFormatter timeFormatter = DateTimeFormatter.ofPattern("HH:mm:ss");
+ String formattedDate = currentDateInEST.format(dateFormatter);
+ String formattedTime = currentTimeInEST.format(timeFormatter);
+ //int maxSeats = 0;
+ List<Flight> flights = (List<Flight>) session.getAttribute("flightList");
+ 
+ for(Flight ft: DataManager.getInstance().getFlights()){
+	   System.out.println("num: " + ft.getFlightNum() + " is full" + ft.isFull());
 	}
-	public List<String> getFlexibleDates(String inputDate, int days) {
-        List<String> flexibleDates = new ArrayList<>();
-        //DateTimeFormatter formatter = DateTimeFormatter.ofPattern("MM-dd-yyyy");
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
-        LocalDate startDate = LocalDate.parse(inputDate, formatter);
-        
-        ZoneId estZone = ZoneId.of("America/New_York");
-        // Generate flexible dates for the specified range in EST
-        for (int i = -days; i <= days; i++) {
-            LocalDate currentDate = startDate.plusDays(i).atStartOfDay(estZone).toLocalDate();
-            if (!currentDate.isBefore(LocalDate.now(estZone))) {
-                flexibleDates.add(currentDate.format(formatter));
-            }
-        }
-        return flexibleDates;
-    }
-
-	public List<Flight> getFlights(String departureAirport, String arrivalAirport, String flightType, 
-			String cabinClass, String departDate, String returnDate){
-		List<Flight> fls = getFlightsFromDB();
-		List<Flight> resultFlights = new ArrayList<>();
-		if(fls != null) {
-			for(Flight flight: fls) {
-				if(flightType.equals("One Way") || flightType.equals("Round Trip")) {
-					if( (flight.getFromAirport().equals(departureAirport) && flight.getToAirport().equals(arrivalAirport) 
-							&& flight.getFromDate().equals(departDate) && flight.getFlightType().equals(flightType) )) {
-						flight.setCabinClass(cabinClass);
-						resultFlights.add(flight);
+ 
+ if(!flights.isEmpty()){
+	for(Flight flight: flights){
+		if(flightNum != null && flight.getFlightNum() == Integer.parseInt(flightNum)){
+			
+			
+			boolean ticket_exists = false;
+			try (java.sql.Connection conn = new ApplicationDB().getConnection()) {
+				String sql = "SELECT COUNT(*) FROM ticket WHERE username = ? and flight_num = ? and f_Name = ? and l_Name = ?";
+				try (PreparedStatement preparedStatement = conn.prepareStatement(sql)) {
+				    preparedStatement.setString(1, username);
+				    preparedStatement.setString(2, flightNum);
+				    preparedStatement.setString(3, fname);
+				    preparedStatement.setString(4, lname);
+				    try (ResultSet resultSet = preparedStatement.executeQuery()) {
+				        if (resultSet.next()) {
+				            int count = resultSet.getInt(1); // Get the count value
+				            System.out.println("Count: " + count);
+				            if (count > 0) {
+				                ticket_exists = true; // The row exists if count > 0
+				            }
+				        }
+				    }
+				}
+			
+				
+			boolean fullF = flight.isFull();
+			System.out.println("FullF = " + fullF + " ||| Tick Exist = " + ticket_exists);
+			
+			
+			if(!flight.isFull() && ticket_exists == false){
+				
+				Customer customer = new Customer(DataManager.getInstance().getCusID(), username, fname, lname);
+				int seatNum = flight.getAc().getNum_seats();
+				flight.getAc().setNum_seats(--seatNum);
+				if(flight.getAc().getNum_seats() <= 0){
+					flight.setFull(true);
+				}
+				Ticket ticket = new Ticket(seatNum, flight, flight.getCabinClass(), customer, 
+						flight.getPrice() + 150, formattedDate,formattedTime);
+				customer.getFlightTickets().add(ticket);
+				//ticket.setTicketNum(DataManager.getInstance().getTicketNum());
+				
+				String insertQuery = "INSERT INTO ticket (username, from_airport, to_airport, from_date, from_time, " +
+	                    "airline_id, aircraft_id, flight_num, seat_num, class, f_Name, l_Name, " +
+	                    "total_fare, p_date, p_time, num_stops) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+				try(java.sql.Connection connection = new ApplicationDB().getConnection()){
+					try (PreparedStatement preparedStatement = connection.prepareStatement(insertQuery)) {
+						preparedStatement.setString(1, username);
+		                preparedStatement.setString(2, flight.getFromAirport());
+		                preparedStatement.setString(3, flight.getToAirport());
+		                preparedStatement.setDate(4, Date.valueOf(flight.getFromDate()));
+		                preparedStatement.setTime(5, Time.valueOf(flight.getFromTime()));
+		                preparedStatement.setString(6, flight.getAirlineId());
+		                preparedStatement.setString(7, flight.getAircraftId());
+		                preparedStatement.setInt(8, flight.getFlightNum());
+		                preparedStatement.setInt(9, ticket.getSeatNum());
+		                preparedStatement.setString(10, flight.getCabinClass());
+		                preparedStatement.setString(11, customer.getFirstName());
+		                preparedStatement.setString(12, customer.getLastName());
+		                //preparedStatement.setInt(13, ticket.getTicketNum());
+		                preparedStatement.setFloat(13, ticket.getTotalFare());
+		                preparedStatement.setDate(14, Date.valueOf(ticket.getPurchaseDate()));
+		                preparedStatement.setTime(15, Time.valueOf(ticket.getPurchaseTime()));
+		                preparedStatement.setObject(16, flight.getNumStops());
+		                int rowsAffected = preparedStatement.executeUpdate();
+		                System.out.println(rowsAffected + " row(s) inserted successfully.");
+		                if(rowsAffected > 0){
+		                	//ticket.setTicketNum(DataManager.getInstance().getTicketNum());
+		                	String query = "Select id_num from ticket where flight_num = '" + flightNum +"'";
+		                	try(PreparedStatement stmt = connection.prepareStatement(query)){
+		                		try(ResultSet rs = stmt.executeQuery()){
+		                			int ticketNum = 0;
+		                			while(rs.next()){
+		                				ticketNum = rs.getInt("id_num");
+		                			}
+		                			out.println("<p style= 'color: green;'>"+"Ticket has been created: have this for your reference:</p>" + ticketNum);
+		                			ticket.setTicketNum(ticketNum);
+		                		}
+		                	}
+		                }
 					}
-					else if((flight.getToAirport().equals(departureAirport) && flight.getFromAirport().equals(arrivalAirport) && flight.getToDate().equals(departDate) && flight.getFlightType().equals(flightType)) ) {
-						Flight ft = flight;
-						ft.setFromAirport(departureAirport);
-						ft.setToAirport(arrivalAirport);
-						ft.setCabinClass(cabinClass);
-						resultFlights.add(ft);
-						//flight.setFromAirport(departureAirport);
-						//flight.setToAirport(arrivalAirport);
-					}
-				}				
-				else {
-					if(flight.getFromAirport().equals(departureAirport) && flight.getToAirport().equals(arrivalAirport)){
-						flight.setCabinClass(cabinClass);
-						resultFlights.add(flight);
-					}
-					else if(flight.getToAirport().equals(departureAirport) && flight.getFromAirport().equals(arrivalAirport)){
-						Flight ft = flight;
-						ft.setFromAirport(departureAirport);
-						ft.setToAirport(arrivalAirport);
-						ft.setCabinClass(cabinClass);
-						resultFlights.add(ft);
-					}
+				}catch(SQLException e){
+					e.printStackTrace();
 				}
 			}
+			else{
+				out.println("<p style= 'color: red;'>" + "Sorry Flight is Full! You have been added to waitlist" + "</p>");
+				boolean exists = false;
+				try (java.sql.Connection connection = new ApplicationDB().getConnection()) {
+					String sql2 = "SELECT COUNT(*) FROM waitlist WHERE username = ? and flight_num = ? and f_name = ? and l_name = ?";
+					try (PreparedStatement preparedStatement = connection.prepareStatement(sql2)) {
+					    preparedStatement.setString(1, username);
+					    preparedStatement.setString(2, flightNum);
+					    preparedStatement.setString(3, fname);
+					    preparedStatement.setString(4, lname);
+					    try (ResultSet resultSet = preparedStatement.executeQuery()) {
+					        if (resultSet.next()) {
+					            int count = resultSet.getInt(1); // Get the count value
+					            System.out.println("Count: " + count);
+					            if (count > 0) {
+					                exists = true; // The row exists if count > 0
+					            }
+					        }
+					    }
+					}
+			        if(exists == false){
+						String sql1 = "INSERT INTO waitlist (username, flight_num, f_name, l_name) VALUES (?, ?, ?, ?)";
+						try (PreparedStatement preparedStatement = connection.prepareStatement(sql1)) {
+			                // Set parameters for the SQL statement
+			                preparedStatement.setString(1, username);
+			                preparedStatement.setInt(2, flight.getFlightNum());
+							preparedStatement.setString(3, fname);
+							preparedStatement.setString(4, lname);
+			                // Execute the SQL statement
+			                int rowsAffected = preparedStatement.executeUpdate();
+			                System.out.println(rowsAffected + " row(s) inserted into waitlist table.");
+			            }
+			        }
+			        else{
+			        	out.println("<p style= 'color: green;'>" + "Username already exists in the waitlist table.</p>");
+			        }
+		        } catch (SQLException e) {
+		            e.printStackTrace();
+		        }
+			}
 		}
-		return resultFlights;
+	 }
 	}
+  }else{
+		out.println("Something went wrong !!!");
+  }
 }
+%>
+</body>
+</html>
