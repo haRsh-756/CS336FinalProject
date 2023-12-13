@@ -41,14 +41,23 @@
                 Airline ID: <%= flight.getAirlineId() %><br>
                 Aircraft ID: <%= flight.getAircraftId() %><br>
                 Flight Type: <%= flight.getFlightType() %><br>
-                Cabin Type: <%=  flight.getCabinClass() %><br>
+                <% if(flight.getCabinClass() != null){%>
+	                Cabin Type: <%=  flight.getCabinClass() %><br>
+	            <%}%>
                 Depart Date: <%= flight.getFromDate() %><br>
                 Route: <%= flight.getFromAirport() %> to <%= flight.getToAirport() %><br>
                 Departure Time: <%= flight.getFromTime() %><br>
                 Arrival Time: <%= flight.getToTime() %><br>
                 Duration: <%= flight.duration() %><br>
                 Number of Stops: <%= flight.getNumStops() %><br>
-                Price: <%= flight.getPrice() %></p>
+                <% if(flight.getCabinClass() != null){%>
+	                Price: $<%= flight.getPrice() %>
+	            <%}else{%>
+	                Economy Price: $<%= flight.getEcoPrice()%><br>
+	                Business Price: $<%= flight.getBusPrice()%><br>
+	                First Class Price: $<%= flight.getFirPrice()%>
+	            <%}%>
+	             </p>
             </div>
             <!-- "Book Now" button with onclick event -->
             <button class="btn" onclick="handleBookNow('<%= flight.getFlightNum() %>')">Book Now</button>
