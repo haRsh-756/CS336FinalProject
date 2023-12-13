@@ -1,4 +1,6 @@
 CREATE DATABASE  IF NOT EXISTS `travelreservation` /*!40100 DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci */ /*!80016 DEFAULT ENCRYPTION='N' */;
+
+UNLOCK TABLES;
 USE `travelreservation`;
 -- MySQL dump 10.13  Distrib 8.0.34, for macos13 (arm64)
 --
@@ -176,7 +178,7 @@ CREATE TABLE `flights` (
   `to_date` date NOT NULL,
   `to_time` time NOT NULL,
   `is_domestic` tinyint(1) NOT NULL,
-  `flight_num` int NOT NULL,
+  `flight_num` int NOT NULL AUTO_INCREMENT,
   `flight_type` varchar(20) NOT NULL,
   `num_stops` int NOT NULL,
   `eco_price` float NOT NULL,
@@ -191,7 +193,7 @@ CREATE TABLE `flights` (
   CONSTRAINT `flights_ibfk_2` FOREIGN KEY (`aircraft_id`) REFERENCES `aircraft` (`aircraft_id`),
   CONSTRAINT `flights_ibfk_3` FOREIGN KEY (`from_airport`) REFERENCES `airport` (`airport_id`),
   CONSTRAINT `flights_ibfk_4` FOREIGN KEY (`to_airport`) REFERENCES `airport` (`airport_id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=12 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -253,7 +255,7 @@ CREATE TABLE `ticket` (
   `class` varchar(20) NOT NULL,
   `f_Name` varchar(100) NOT NULL,
   `l_Name` varchar(100) NOT NULL,
-  `id_num` int NOT NULL,
+  `id_num` int NOT NULL AUTO_INCREMENT,
   `total_fare` float NOT NULL,
   `p_date` date NOT NULL,
   `p_time` time NOT NULL,
@@ -271,7 +273,7 @@ CREATE TABLE `ticket` (
   CONSTRAINT `ticket_ibfk_4` FOREIGN KEY (`from_airport`) REFERENCES `airport` (`airport_id`),
   CONSTRAINT `ticket_ibfk_5` FOREIGN KEY (`to_airport`) REFERENCES `airport` (`airport_id`),
   CONSTRAINT `ticket_ibfk_6` FOREIGN KEY (`flight_num`) REFERENCES `flights` (`flight_num`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=12 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -294,6 +296,8 @@ DROP TABLE IF EXISTS `waitlist`;
 CREATE TABLE `waitlist` (
   `username` varchar(300) DEFAULT NULL,
   `flight_num` int DEFAULT NULL,
+  `f_name` varchar(100) DEFAULT NULL,
+  `l_name` varchar(100) DEFAULT NULL,
   KEY `username` (`username`),
   KEY `flight_num` (`flight_num`),
   CONSTRAINT `waitlist_ibfk_1` FOREIGN KEY (`username`) REFERENCES `customer` (`username`),
@@ -307,7 +311,7 @@ CREATE TABLE `waitlist` (
 
 LOCK TABLES `waitlist` WRITE;
 /*!40000 ALTER TABLE `waitlist` DISABLE KEYS */;
-INSERT INTO `waitlist` VALUES ('user123',1001);
+INSERT INTO `waitlist` VALUES ('user123',1001,'Michael', 'Scott');
 /*!40000 ALTER TABLE `waitlist` ENABLE KEYS */;
 UNLOCK TABLES;
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
