@@ -6,21 +6,6 @@ import java.time.Duration;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 
-/* `airline_id` varchar(5) NOT NULL,
-//`aircraft_id` varchar(5) NOT NULL,
-//`from_airport` varchar(5) NOT NULL,
-//`from_date` date NOT NULL,
-//`from_time` time NOT NULL,
-//`to_airport` varchar(5) NOT NULL,
-//`to_date` date NOT NULL,
-//`to_time` time NOT NULL,
-//`is_domestic` tinyint(1) NOT NULL,
-//`flight_num` int NOT NULL,
-//`flight_type` varchar(20) NOT NULL,
-//`num_stops` int NOT NULL,
-//`eco_price` float NOT NULL,
-//`bus_price` float NOT NULL,
-//`fir_price` float NOT NULL,*/
 public class Flight{
 	private String airlineId;
 	private String aircraftId;
@@ -95,14 +80,17 @@ public class Flight{
 		this.isFull = isFull;
 	}
 	public float getPrice (){
-		switch(this.cabinClass){
-		case "Business":
-			return this.busPrice;
-		case "FirstClass":
-			return this.firPrice;
-		default:
-			return this.ecoPrice;
+		if(this.cabinClass != null) {
+			switch(this.cabinClass){
+			case "Business":
+				return this.busPrice;
+			case "FirstClass":
+				return this.firPrice;
+			default:
+				return this.ecoPrice;
+			}
 		}
+		return ecoPrice;
 	}
 	public String duration() {
 		LocalTime fromTime = LocalTime.parse(this.fromTime);
