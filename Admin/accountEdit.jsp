@@ -72,36 +72,42 @@
 
 
             try {
-            	ApplicationDB db = new ApplicationDB();	
+                ApplicationDB db = new ApplicationDB();    
                 Connection conn = db.getConnection();
                 PreparedStatement ps = null;
-                if ("Add Account".equals(action)) {
-                    String sql = "INSERT INTO " + accountType + " (username, password) VALUES (?, ?)";
-                    ps = conn.prepareStatement(sql);
-                    ps.setString(1, username);
-                    ps.setString(2, password);
-                    ps.executeUpdate();
-                    out.println("<p>Account added successfully.</p>");
-                } else if ("Delete Account".equals(action)) {
-                    String sql = "DELETE FROM " + accountType + " WHERE username = ?";
-                    ps = conn.prepareStatement(sql);
-                    ps.setString(1, username);
-                    ps.executeUpdate();
-                    out.println("<p>Account deleted successfully.</p>");
-                }else if ("Change Password".equals(action) && !"admin".equals(accountTypeChange)) {
-                    String sql = "UPDATE " + accountTypeChange + " SET password = ? WHERE username = ?";
-                    ps = conn.prepareStatement(sql);
-                    ps.setString(1, newPassword);
-                    ps.setString(2, usernameChange);
-                    ps.executeUpdate();
-                    out.println("<p>Password changed successfully.</p>");
+                try {
+                    if ("Add Account".equals(action)) {
+                        String sql = "INSERT INTO " + accountType + " (username, password) VALUES (?, ?)";
+                        ps = conn.prepareStatement(sql);
+                        ps.setString(1, username);
+                        ps.setString(2, password);
+                        ps.executeUpdate();
+                        out.println("<p>Account added successfully.</p>");
+                    } else if ("Delete Account".equals(action)) {
+                        String sql = "DELETE FROM " + accountType + " WHERE username = ?";
+                        ps = conn.prepareStatement(sql);
+                        ps.setString(1, username);
+                        ps.executeUpdate();
+                        out.println("<p>Account deleted successfully.</p>");
+                    } else if ("Change Password".equals(action)) {
+                        String sql = "UPDATE " + accountTypeChange + " SET password = ? WHERE username = ?";
+                        ps = conn.prepareStatement(sql);
+                        ps.setString(1, newPassword);
+                        ps.setString(2, usernameChange);
+                        ps.executeUpdate();
+                        out.println("<p>Password changed successfully.</p>");
+                    }
+                } finally {
+                    if (ps != null) {
+                        ps.close();
+                    }
                 }
-                ps.close();
                 conn.close();
             } catch (Exception e) {
                 e.printStackTrace();
                 out.println("<p>Error occurred: " + e.getMessage() + "</p>");
             }
+
         }
     %>
 </body>
