@@ -13,3 +13,4 @@ Customer Representative:
 1. custrep123, password123
 2. custrep456, password456
 
+Database(MySQL) credentials needs to be changed under java/com/air/ApplicationDB.java when running the project
