@@ -286,7 +286,160 @@ public class GenerateFlights{
 		}
 		return resultFlights;
 	}
-	
+	public List<Flight> filterFlights(String maxPrice, String maxStops, String airline, String takeOffTime, String landingTime, String fromAirport, String toAirport,
+                                          String flightType, String cabinClass, String departDate, String returnDate){
+		System.out.println(fromAirport + " to " + toAirport);
+		if("flexibleOneWay".equals(flightType)) {
+			flightType = "One Way";
+		}
+		else if("flexibleRound".equals(flightType)) {
+			flightType = "Round Trip";
+		}
+		List<Flight> filteredFlights = new ArrayList<>();
+		try(java.sql.Connection connection = new ApplicationDB().getConnection()){
+			StringBuilder sql = new StringBuilder("SELECT * FROM flights WHERE 1=1");
+			if (isNotEmpty(maxPrice)) {
+		        sql.append(" AND (eco_price <= ? OR bus_price <= ? OR fir_price <= ?)");
+		    }
+		    if (isNotEmpty(maxStops)) {
+		        sql.append(" AND num_stops <= ?");
+		    }
+		    if (isNotEmpty(airline)) {
+		        sql.append(" AND airline_id = ?");
+		    }
+		    if (isNotEmpty(takeOffTime)) {
+		        sql.append(" AND HOUR(from_time) >= ?");
+		    }
+		    if (isNotEmpty(landingTime)) {
+		        sql.append(" AND HOUR(to_time) <= ?");
+		    }
+		    if (isNotEmpty(fromAirport)) {
+		        sql.append(" AND from_airport = ?");
+		    }
+		    if (isNotEmpty(toAirport)) {
+		        sql.append(" AND to_airport = ?");
+		    }
+		    if (isNotEmpty(flightType)) {
+		        sql.append(" AND flight_type = ?");
+		    }
+		    if (isNotEmpty(departDate)) {
+		        sql.append(" AND from_date >= ?");
+		    }
+		    if (isNotEmpty(returnDate)) {
+		        sql.append(" AND to_date <= ?");
+		    }
+		    try (PreparedStatement preparedStatement = connection.prepareStatement(sql.toString())) {
+				// Set parameters for the SQL statement
+
+				int parameterIndex = 1;
+		        if (isNotEmpty(maxPrice)) {
+		            //preparedStatement.setFloat(parameterIndex++, Float.parseFloat(maxPrice));
+		        	float maxPriceValue = Float.parseFloat(maxPrice);
+		            preparedStatement.setFloat(parameterIndex++, maxPriceValue);
+		            preparedStatement.setFloat(parameterIndex++, maxPriceValue);  // for bus_price
+		            preparedStatement.setFloat(parameterIndex++, maxPriceValue);
+		        }
+		        if (isNotEmpty(maxStops)) {
+		            preparedStatement.setInt(parameterIndex++, Integer.parseInt(maxStops));
+		        }
+		        if (isNotEmpty(airline)) {
+		            preparedStatement.setString(parameterIndex++, airline);
+		        }
+		        if (isNotEmpty(takeOffTime)) {
+		        	//int takeOffHourValue = Integer.parseInt(takeOffTime);
+		            //preparedStatement.setInt(parameterIndex++, takeOffHourValue);
+		        	
+		            //preparedStatement.setString(parameterIndex++, takeOffTime);
+		        	
+		        	int takeOffHour = parseHour(takeOffTime);
+		            preparedStatement.setInt(parameterIndex++, takeOffHour);
+		        }
+		        if (isNotEmpty(landingTime)) {
+		            //preparedStatement.setString(parameterIndex, landingTime);
+		        	//int landingHourValue = Integer.parseInt(landingTime);
+		            //preparedStatement.setInt(parameterIndex, landingHourValue);
+		        	int landingHour = parseHour(landingTime);
+		            preparedStatement.setInt(parameterIndex++, landingHour);
+		        }
+		        if (isNotEmpty(fromAirport)) {
+		            preparedStatement.setString(parameterIndex++, fromAirport);
+		        }
+		        if (isNotEmpty(toAirport)) {
+		            preparedStatement.setString(parameterIndex++, toAirport);
+		        }
+		        if (isNotEmpty(flightType)) {
+		            preparedStatement.setString(parameterIndex++, flightType);
+		        }
+		        if (isNotEmpty(departDate)) {
+		        	java.sql.Date departDateValue = java.sql.Date.valueOf(departDate);
+		            preparedStatement.setDate(parameterIndex++, departDateValue);
+		        }
+		        if (isNotEmpty(returnDate)) {
+		        	java.sql.Date returnDateValue = java.sql.Date.valueOf(returnDate);
+		            preparedStatement.setDate(parameterIndex, returnDateValue);
+		        }
+		        try (ResultSet resultSet = preparedStatement.executeQuery()) {
+		            // Process the result set and populate the list of filtered flights
+		            while (resultSet.next()) {
+		                //Flight flight = new Flight();
+		                //flight.setFlightNum(resultSet.getInt("flight_num"));
+		                // Set other properties as needed
+		                //filteredFlights.add(flight);
+		            	 String airlineId = resultSet.getString("airline_id");
+					     String aircraftId = resultSet.getString("aircraft_id");
+					     fromAirport = resultSet.getString("from_airport");
+					     String fromDate = resultSet.getString("from_date");
+					     String fromTime = resultSet.getString("from_time");
+					     toAirport = resultSet.getString("to_airport");
+					     String toDate = resultSet.getString("to_date");
+					     String toTime = resultSet.getString("to_time");
+					     int isDomestic = resultSet.getInt("is_domestic");
+					     int flightNum = resultSet.getInt("flight_num");
+					     flightType = resultSet.getString("flight_type");
+					     int numStops = resultSet.getInt("num_stops");
+					     float ecoPrice = resultSet.getFloat("eco_price");
+					     float busPrice = resultSet.getFloat("bus_price");
+					     float firPrice = resultSet.getFloat("fir_price");
+					     int maxSeats = 0;
+					     
+					     //System.out.println(ft.toString());
+					     String maxSeatsQuery = "SELECT num_seats FROM aircraft WHERE aircraft_id = ?";
+			                try (PreparedStatement preparedStatement1 = connection.prepareStatement(maxSeatsQuery)) {
+			                    preparedStatement1.setString(1, aircraftId);
+			                    try (ResultSet rs = preparedStatement1.executeQuery()) {
+			                        if (rs.next()) {
+			                            maxSeats = rs.getInt("num_seats");
+			                        }
+			                    }
+			                }
+
+			                // Check if the flight is full
+		                String ticketCountQuery = "SELECT COUNT(*) as ticket_count FROM ticket WHERE flight_num = ?";
+		                boolean isFull = false;
+		                try (PreparedStatement preparedStatement2 = connection.prepareStatement(ticketCountQuery)) {
+		                    preparedStatement2.setInt(1, flightNum);
+		                    try (ResultSet rs = preparedStatement2.executeQuery()) {
+		                        if (rs.next() && rs.getInt("ticket_count") >= maxSeats) {
+		                            isFull = true;
+		                        }
+		                    }
+		                }
+					     Flight ft = new Flight(airlineId,aircraftId, fromAirport, fromDate, fromTime, toAirport, toDate, toTime, 
+					    		 isDomestic, flightNum, flightType, numStops, ecoPrice, busPrice, firPrice,isFull);
+					     ft.setAc(new Aircraft(aircraftId, maxSeats));
+					     ft.setCabinClass(cabinClass);
+					     filteredFlights.add(ft);
+					     System.out.println(ft.toString());
+		            }
+		        }
+		    }
+		    
+		} catch (SQLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		return filteredFlights;
+	}
 	public List<Flight> filterFlights(String maxPrice, String maxStops, String airline,
         String takeOffTime, String landingTime) throws SQLException {
 		List<Flight> filteredFlights = new ArrayList<>();
