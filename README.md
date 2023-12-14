@@ -6,11 +6,10 @@ Authors: Harsh Patel, Saad Farghani, Hieu Nguyen
 Group #7
 
 Admin: 
-1. admin123, password123
-2. admin456, password456
+1. Username: admin123, Password: password123
 
 Customer Representative:
-1. custrep123, password123
-2. custrep456, password456
+1. Username: custrep123, Password: password123
+
 
 Database(MySQL) credentials needs to be changed under java/com/air/ApplicationDB.java when running the project
