@@ -42,15 +42,19 @@
             display: flex;
             align-items: center;
         }
+        #filter {
+         	display: flex;
+         	padding: 10px;
+            /* width: 800px;
+            margin: 10px auto; */
+            align-items: center;
+        }
         /* #flightFilterForm {
             display: flex;
             width: 800px;
             margin: 20px auto;
         } */
-		#flightFilterForm {
-		 display: flex;
-		 align-items: center;
-		}
+		
                  
         /* #flightFilterForm input[type="submit"] {
             background-color: #4CAF50;
@@ -123,12 +127,12 @@
 		</div><br>
 		<!-- <button onclick="displayFlights.jsp">Search Flights</button> -->
 		<input type="hidden" name="formType" value="Search Flights">
-		<input type="submit" value="Search Flights" class="custom-button"/>
-		</form>
+		<input type="submit" name="searchButton" value="Search Flights" class="custom-button"/>
+	
 		
 		<br>
 		<h3>Filter By</h3>
-			<div><form id="flightFilterForm" action="displayFlights.jsp" method="post" onsubmit="return validateForm()">
+			<div id="filter"><!-- <form id="flightFilterForm" action="displayFlights.jsp" method="post" onsubmit="return validateForm()"> -->
 		    <label for="maxPrice">Maximum Price:</label>
 		    <input type="text" name="maxPrice" id="maxPrice">
 			 <label for="maxStops">Maximum Stops:</label>
@@ -141,7 +145,7 @@
 		    <input type="text" name="landingTime" id="landingTime" placeholder ="00:00">
 		    </div><br>
 		    <input type="hidden" name="formType" value="Filter Flights">
-		    <input type="submit" value="Filter Flights" class="custom-button"/>
+		    <input type="submit" name="filterButton" value="Filter Flights" class="custom-button" onclick="return validateForm()"/>
 		</form>
 		<%
 		    ApplicationDB db = new ApplicationDB();
