@@ -51,24 +51,20 @@
 
 <pre>
 <% 
-		/* String fromAirport = request.getParameter("selectedDepartAirport");
+		String fromAirport = request.getParameter("selectedDepartAirport");
 		String toAirport = request.getParameter("selectedArrivalAirport");
 		String depDate = request.getParameter("departDate");
 		String retDate = request.getParameter("returnDate");
 		String cabinClass = request.getParameter("cabinClass");
-		String flightType = request.getParameter("flightType"); */
+		String flightType = request.getParameter("flightType");
 		String sortCriteria = request.getParameter("sortCriteria");
-		String formType = request.getParameter("formType");
+		String filterButton = request.getParameter("filterButton");
+		String searchButton = request.getParameter("searchButton");
 		
 		List<Flight> flights = null;
 		
-		if ("Search Flights".equals(formType)) {
-			String fromAirport = request.getParameter("selectedDepartAirport");
-			String toAirport = request.getParameter("selectedArrivalAirport");
-			String depDate = request.getParameter("departDate");
-			String retDate = request.getParameter("returnDate");
-			String cabinClass = request.getParameter("cabinClass");
-			String flightType = request.getParameter("flightType");
+		if ("Search Flights".equals(searchButton)) {
+			
 			
 			out.println("<p>Departure: " + fromAirport);
 			out.println("Arrival: " + toAirport);
@@ -80,14 +76,15 @@
 			flights = new GenerateFlights().getFlights(fromAirport, toAirport, flightType, cabinClass, depDate, retDate);
 			session.setAttribute("flightList", flights);
 			
-		}else if("Filter Flights".equals(formType)){
+		}else if("Filter Flights".equals(filterButton)){
 			String maxPrice = request.getParameter("maxPrice");
 	        String maxStops = request.getParameter("maxStops");
 	        String airline = request.getParameter("airline");
 	        String takeOffTime = request.getParameter("takeOffTime");
 	        String landingTime = request.getParameter("landingTime");
 	        out.println();
-	        flights = new GenerateFlights().filterFlights(maxPrice, maxStops, airline, takeOffTime, landingTime);
+	        flights = new GenerateFlights().filterFlights(maxPrice, maxStops, airline, takeOffTime, landingTime,
+	        		fromAirport, toAirport, flightType, cabinClass, depDate, retDate);
 	        session.setAttribute("flightList", flights);
 		}
 		//List<Flight> sortedFlights = (List<Flight>) session.getAttribute("sortedFlightList");
