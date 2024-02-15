@@ -1,5 +1,5 @@
 # CS336FinalProject
-Travel Reservation System
+Travel/Flight Reservation System
 
 Authors: Harsh Patel, Saad Farghani, Hieu Nguyen
 
