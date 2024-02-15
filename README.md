@@ -13,3 +13,5 @@ Customer Representative:
 
 
 Database(MySQL) credentials needs to be changed under java/com/air/ApplicationDB.java when running the project
+
+Please follow both [Rutgers University's Principles of Academic Integrity](https://academicintegrity.rutgers.edu) and the [Rutgers Department of Computer Science's Academic Integrity Policy](https://www.cs.rutgers.edu/academics/undergraduate/academic-integrity-policy)
